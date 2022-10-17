@@ -3,7 +3,8 @@ package org.example.server;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ClientNotifier {
     private final List<Client> clients = new ArrayList<>();
@@ -26,6 +27,7 @@ public class ClientNotifier {
     }
 
     public void notifyClients(String message, Client curClient) {
+        chat.logMessage(message);
         for (Client client: clients) {
             if (client != curClient) {
                 client.notifyInChat(message);

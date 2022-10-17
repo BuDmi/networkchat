@@ -11,16 +11,16 @@ import java.time.format.DateTimeFormatter;
 public class Client extends Thread {
     private final Chat chat;
     private final ClientNotifier clientNotifier;
-    private PrintWriter out;
-    private BufferedReader in;
+    private PrintWriter serverMessageWriter;
+    private BufferedReader clientMessageReader;
     private volatile String name;
-    private String newMessage = "";
+    private volatile String newMessage = "";
     public Client(Socket socket, Chat chat, ClientNotifier clientNotifier) {
         this.chat = chat;
         this.clientNotifier = clientNotifier;
         try {
-            out = new PrintWriter(socket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            serverMessageWriter = new PrintWriter(socket.getOutputStream(), true);
+            clientMessageReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.start();
         } catch (IOException e) {
             System.out.println("Couldn't initialize socket streams");
@@ -35,11 +35,11 @@ public class Client extends Thread {
     @Override
     public void run() {
         setClientName();
-        out.println("Welcome in our chat, `" + name + "` !");
+        serverMessageWriter.println("Welcome in our chat, `" + name + "` !");
         clientNotifier.notifyClients("User `" + name + "` joined the chat", this);
         while (!isInterrupted()) {
             try {
-                if (in.ready()) {
+                if (clientMessageReader.ready()) {
                     registerMessageFromCurrentClient();
                 } else {
                     publishMessageFromAnotherClients();
@@ -52,14 +52,14 @@ public class Client extends Thread {
 
     private void publishMessageFromAnotherClients() {
         if (!newMessage.isEmpty()) {
-            out.println(newMessage);
+            serverMessageWriter.println(newMessage);
             newMessage = "";
         }
     }
 
     private void registerMessageFromCurrentClient() {
         try {
-            String message = in.readLine();
+            String message = clientMessageReader.readLine();
             if (message.equals("/exit")) {
                 clientNotifier.deleteClient(this);
                 this.interrupt();
@@ -73,17 +73,17 @@ public class Client extends Thread {
     }
 
     private void setClientName() {
-        out.println("Please set your name to enter in chat: ");
+        serverMessageWriter.println("Please set your name to enter in chat: ");
         try {
-            this.name = in.readLine();
+            this.name = clientMessageReader.readLine();
         } catch (IOException e) {
             System.out.println("Couldn't get name");
             this.interrupt();
         }
         while (clientNotifier.checkForExistedClientName(name)) {
-            out.println("The name `" + name + "` is already exist in chat. Please, set another name");
+            serverMessageWriter.println("The name `" + name + "` is already exist in chat. Please, set another name");
             try {
-                this.name = in.readLine();
+                this.name = clientMessageReader.readLine();
             } catch (IOException e) {
                 System.out.println("Couldn't get name");
                 this.interrupt();

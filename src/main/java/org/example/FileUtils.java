@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class FileUtils {
     public static Boolean createNewFile(String path, String fileName) {
-        File file = new File(fileName);
+        File file = new File(path, fileName);
 
         try {
             if (file.exists()) {
@@ -37,8 +37,8 @@ public class FileUtils {
     }
 
     public static void writeTextToFile(String path, String file, String text) throws IOException {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
-            writer.write(text);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(path + file, true))) {
+            writer.write(text + "\n");
             writer.flush();
         } catch (IOException ex) {
             System.out.println(Arrays.toString(ex.getStackTrace()));
