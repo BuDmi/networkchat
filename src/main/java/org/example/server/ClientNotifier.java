@@ -6,7 +6,7 @@ import java.util.List;
 
 public class ClientNotifier {
     private final List<Client> clients = new ArrayList<>();
-    private Chat chat;
+    private final Chat chat;
 
     public ClientNotifier(Chat chat) {
         this.chat = chat;

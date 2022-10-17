@@ -2,11 +2,9 @@ package org.example.server;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Chat {
-    private List<String> messages = new ArrayList<>();
-    private AtomicInteger clientsNum = new AtomicInteger(0);
+    private final List<String> messages = new ArrayList<>();
 
     public synchronized String sendMessage() {
         while (messages.size() == 0) {
@@ -22,13 +20,5 @@ public class Chat {
     public synchronized void receiveMessage(String message) {
         messages.add(message);
         notify();
-    }
-
-    public synchronized void incrementClientsNum() {
-        clientsNum.incrementAndGet();
-    }
-
-    public synchronized void decrementClientsNum() {
-        clientsNum.decrementAndGet();
     }
 }
