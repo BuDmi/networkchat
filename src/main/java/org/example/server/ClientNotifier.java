@@ -3,8 +3,6 @@ package org.example.server;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class ClientNotifier {
     private final List<Client> clients = new ArrayList<>();
@@ -18,8 +16,19 @@ public class ClientNotifier {
         clients.add(new Client(socket, chat, this));
     }
 
-    public Boolean checkForExistedClientName(String newClientName) {
-        return clients.stream().filter(client -> client.getClientName().equals(newClientName)).count() > 1;
+    public Boolean checkForExistedClientName(Client curClient) {
+        synchronized (clients) {
+            String newClientName = curClient.getClientName();
+            for(Client client: clients) {
+                if (client == curClient) {
+                    continue;
+                }
+                if (client.getClientName().equals(newClientName)) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     public void deleteClient(Client client) {

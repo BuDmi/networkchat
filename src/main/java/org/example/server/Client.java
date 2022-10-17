@@ -13,8 +13,8 @@ public class Client extends Thread {
     private final ClientNotifier clientNotifier;
     private PrintWriter serverMessageWriter;
     private BufferedReader clientMessageReader;
-    private volatile String name;
-    private volatile String newMessage = "";
+    private String name = "";
+    private String newMessage = "";
     public Client(Socket socket, Chat chat, ClientNotifier clientNotifier) {
         this.chat = chat;
         this.clientNotifier = clientNotifier;
@@ -80,7 +80,7 @@ public class Client extends Thread {
             System.out.println("Couldn't get name");
             this.interrupt();
         }
-        while (clientNotifier.checkForExistedClientName(name)) {
+        while (clientNotifier.checkForExistedClientName(this)) {
             serverMessageWriter.println("The name `" + name + "` is already exist in chat. Please, set another name");
             try {
                 this.name = clientMessageReader.readLine();
