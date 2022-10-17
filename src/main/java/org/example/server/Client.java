@@ -28,8 +28,51 @@ public class Client extends Thread {
         }
     }
 
+    public String getClientName() {
+        return name;
+    }
+
     @Override
     public void run() {
+        setClientName();
+        out.println("Welcome in our chat, `" + name + "` !");
+        clientNotifier.notifyClients("User `" + name + "` joined the chat", this);
+        while (!isInterrupted()) {
+            try {
+                if (in.ready()) {
+                    registerMessageFromCurrentClient();
+                } else {
+                    publishMessageFromAnotherClients();
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void publishMessageFromAnotherClients() {
+        if (!newMessage.isEmpty()) {
+            out.println(newMessage);
+            newMessage = "";
+        }
+    }
+
+    private void registerMessageFromCurrentClient() {
+        try {
+            String message = in.readLine();
+            if (message.equals("/exit")) {
+                clientNotifier.deleteClient(this);
+                this.interrupt();
+            } else {
+                chat.receiveMessage(formChatMessage(message));
+                clientNotifier.notifyClients(chat.sendMessage(), this);
+            }
+        } catch (IOException e) {
+            System.out.println("Error on receiving message for client " + name);
+        }
+    }
+
+    private void setClientName() {
         out.println("Please set your name to enter in chat: ");
         try {
             this.name = in.readLine();
@@ -37,32 +80,13 @@ public class Client extends Thread {
             System.out.println("Couldn't get name");
             this.interrupt();
         }
-        out.println("Welcome in our chat, `" + name + "` !");
-        chat.incrementClientsNum();
-        clientNotifier.notifyClients("User `" + name + "` joined the chat", this);
-        while (!isInterrupted()) {
+        while (clientNotifier.checkForExistedClientName(name)) {
+            out.println("The name `" + name + "` is already exist in chat. Please, set another name");
             try {
-                if (in.ready()) {
-                    try {
-                        String message = in.readLine();
-                        if (message.equals("/exit")) {
-                            clientNotifier.deleteClient(this);
-                            this.interrupt();
-                        } else {
-                            chat.receiveMessage(formChatMessage(message));
-                            clientNotifier.notifyClients(chat.sendMessage(), this);
-                        }
-                    } catch (IOException e) {
-                        System.out.println("Error on receiving message for client " + name);
-                    }
-                } else {
-                    if (!newMessage.isEmpty()) {
-                        out.println(newMessage);
-                        newMessage = "";
-                    }
-                }
+                this.name = in.readLine();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                System.out.println("Couldn't get name");
+                this.interrupt();
             }
         }
     }

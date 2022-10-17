@@ -3,6 +3,7 @@ package org.example.server;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ClientNotifier {
     private final List<Client> clients = new ArrayList<>();
@@ -12,10 +13,12 @@ public class ClientNotifier {
         this.chat = chat;
     }
 
-    enum RES {EXISTED_CLIENT, SUCCESS}
-
     public void addNewClient(Socket socket) {
         clients.add(new Client(socket, chat, this));
+    }
+
+    public Boolean checkForExistedClientName(String newClientName) {
+        return clients.stream().filter(client -> client.getClientName().equals(newClientName)).count() > 1;
     }
 
     public void deleteClient(Client client) {
