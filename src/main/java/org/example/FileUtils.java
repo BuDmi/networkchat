@@ -10,10 +10,10 @@ public class FileUtils {
         File file = new File(path, fileName);
 
         try {
-            if (file.exists()) {
-                file.delete();
+            if (!file.exists()) {
+                return file.createNewFile();
             }
-            return file.createNewFile();
+            return true;
         } catch (IOException ex) {
             return false;
         }
