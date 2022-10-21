@@ -20,7 +20,7 @@ public class ClientNotifier {
         synchronized (clients) {
             String newClientName = curClient.getClientName();
             for(Client client: clients) {
-                if (client == curClient) {
+                if (client == curClient && !client.isClientEnteredInChat()) {
                     continue;
                 }
                 if (client.getClientName().equals(newClientName)) {
@@ -39,7 +39,7 @@ public class ClientNotifier {
         synchronized (clients) {
             chat.logMessage(message);
             for (Client client : clients) {
-                if (client != curClient) {
+                if (client != curClient && client.isClientEnteredInChat()) {
                     client.notifyInChat(message);
                 }
             }

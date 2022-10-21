@@ -15,6 +15,7 @@ public class Client extends Thread {
     private BufferedReader clientMessageReader;
     private String name = "";
     private String newMessage = "";
+    private Boolean clientEnteredInChat = false;
     public Client(Socket socket, Chat chat, ClientNotifier clientNotifier) {
         this.chat = chat;
         this.clientNotifier = clientNotifier;
@@ -32,9 +33,14 @@ public class Client extends Thread {
         return name;
     }
 
+    public Boolean isClientEnteredInChat() {
+        return clientEnteredInChat;
+    }
+
     @Override
     public void run() {
         setClientName();
+        clientEnteredInChat = true;
         serverMessageWriter.println("Welcome in our chat, `" + name + "` !");
         clientNotifier.notifyClients("User `" + name + "` joined the chat", this);
         while (!isInterrupted()) {
