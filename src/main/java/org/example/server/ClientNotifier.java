@@ -36,10 +36,12 @@ public class ClientNotifier {
     }
 
     public void notifyClients(String message, Client curClient) {
-        chat.logMessage(message);
-        for (Client client: clients) {
-            if (client != curClient) {
-                client.notifyInChat(message);
+        synchronized (clients) {
+            chat.logMessage(message);
+            for (Client client : clients) {
+                if (client != curClient) {
+                    client.notifyInChat(message);
+                }
             }
         }
     }
